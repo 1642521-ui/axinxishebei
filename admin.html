@@ -22,16 +22,18 @@
 <body>
   <h2>采集数据后台</h2>
   <div id="listBox"></div>
+  <button class="clear" onclick="clearAll()">清空所有数据</button>
 
   <script>
-    const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+    // 替换成你部署后的后端接口地址，比如：https://你的项目名.vercel.app/api/data
+    const API_URL = 'https://你的项目名.vercel.app/api/data';
 
     // 加载所有数据
     async function loadData() {
       const res = await fetch(API_URL);
       const list = await res.json();
       let html = '';
-      list.slice(-10).forEach((item, index) => {
+      list.forEach((item, index) => {
         html += `
           <div class="item">
             <p>编号：<span>${index + 1}</span></p>
@@ -44,6 +46,13 @@
         `;
       });
       document.getElementById('listBox').innerHTML = html;
+    }
+
+    // 清空所有数据
+    async function clearAll() {
+      await fetch(API_URL, { method: 'DELETE' });
+      loadData();
+      alert('数据已清空！');
     }
 
     // 页面加载时自动刷新数据
